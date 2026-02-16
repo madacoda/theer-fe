@@ -1,4 +1,5 @@
-import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
 
 import { AdminSidebar } from '@/components/admin/layout/sidebar'
 import { AdminHeader } from '@/components/admin/layout/header'
@@ -46,6 +47,26 @@ function AdminNotFound() {
 }
 
 function AdminLayout() {
+  const navigate = useNavigate()
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate({
+        to: '/login',
+        search: {
+          redirect: window.location.href,
+        },
+      })
+    } else {
+      setIsReady(true)
+    }
+  }, [navigate])
+
+  if (!isReady) {
+    return null
+  }
+
   return (
     <SidebarProvider className="admin-theme">
       <AdminSidebar />

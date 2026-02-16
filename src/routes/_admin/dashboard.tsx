@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Activity, BookOpen, DollarSign, Users } from 'lucide-react'
+import { Activity, AlertCircle, CheckCircle2, MessageSquare } from 'lucide-react'
 
 import { ChartAreaInteractive } from '@/components/admin/dashboard/area-chart-interactive'
-import { RecentEnrollments } from '@/components/admin/dashboard/recent-enrollments'
+import { TopUsers } from '@/components/admin/dashboard/top-users'
+import { TopCategories } from '@/components/admin/dashboard/top-categories'
+import { TopAdmins } from '@/components/admin/dashboard/top-admins'
 import {
   Card,
   CardContent,
@@ -17,74 +19,100 @@ export const Route = createFileRoute('/_admin/dashboard')({
 
 function DashboardPage() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border-l-4 border-l-red-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-red-600">Open Tickets</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
+            <div className="text-2xl font-bold">128</div>
             <p className="text-xs text-muted-foreground">
-              +20.1% from last month
+              +12 from yesterday
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Courses
+            <CardTitle className="text-sm font-medium text-green-600">
+              Processed Tickets
             </CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12</div>
+            <div className="text-2xl font-bold">1,240</div>
             <p className="text-xs text-muted-foreground">
-              +2 new courses this month
+              +85 this week
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Students
+            <CardTitle className="text-sm font-medium text-blue-600">
+              AI Handled (Draft)
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Activity className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2,350</div>
+            <div className="text-2xl font-bold">45</div>
             <p className="text-xs text-muted-foreground">
-              +180 new students this month
+              Needs human resolution
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Now</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Tickets Today</CardTitle>
+            <MessageSquare className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            <div className="text-2xl font-bold">145</div>
             <p className="text-xs text-muted-foreground">
-              +201 since last hour
+              +15% from avg
             </p>
           </CardContent>
         </Card>
       </div>
+      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-4">
           <ChartAreaInteractive />
         </div>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Recent Enrollments</CardTitle>
+            <CardTitle>Top Users</CardTitle>
             <CardDescription>
-              You had 265 new enrollments this month.
+              Users with the most ticket submissions
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RecentEnrollments />
+            <TopUsers />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Categories</CardTitle>
+            <CardDescription>
+              Most frequent ticket categories this month
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopCategories />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Admins (Weekly)</CardTitle>
+            <CardDescription>
+              Agents with the highest resolution rate
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopAdmins />
           </CardContent>
         </Card>
       </div>

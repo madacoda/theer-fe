@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-/}
+    container_name: mctheer-fe
+    restart: unless-stopped
+    ports:
+      - "${PORT:-1000}:${PORT:-1000}"
+    environment:
+      - PORT=${PORT:-1000}
+      - NITRO_PORT=${PORT:-1000}
+      - HOST=0.0.0.0
+      - VITE_API_URL=/
+      - API_URL=http://mctheer-api:3000
+      - NODE_ENV=production
+    networks:
+      - mctheer-network
+
+networks:
+  mctheer-network:
+    name: mctheer-network
+    external: true
+
+# Note: If you want to connect to the backend container directly within a shared docker network,
+# you can change the VITE_API_URL to http://mctheer-api:3000 (if the backend container is named mctheer-api)
+# and ensure both projects use the same network name.

@@ -7,13 +7,21 @@ import { defineConfig, loadEnv } from 'vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  const target = env.API_URL || 'http://localhost:3000'
+  const env = { ...process.env, ...loadEnv(mode, process.cwd(), '') }
 
   return {
     plugins: [
       devtools(),
-      nitro(),
+      nitro({
+        devPort: Number(env.PORT) || 1000,
+        routeRules: {
+          '/api/**': {
+            // Forward everything under /api directly to the backend container
+            // Ensure the /api prefix is preserved if the backend expects it
+            proxy: (env.API_URL || 'http://mctheer-api:3000') + '/api/**',
+          },
+        },
+      }),
       viteTsConfigPaths({
         projects: ['./tsconfig.json'],
       }),
@@ -22,11 +30,11 @@ export default defineConfig(({ mode }) => {
       viteReact(),
     ],
     server: {
+      port: Number(env.PORT) || 1000,
       proxy: {
         '/api': {
-          target,
+          target: env.API_URL || 'http://localhost:3000',
           changeOrigin: true,
-          secure: false,
         },
       },
     },

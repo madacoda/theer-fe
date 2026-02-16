@@ -35,6 +35,11 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
     authService.getProfile().then(setUser).catch(console.error)
   }, [])
 
+  // Show sidebar only for admin role
+  if (mounted && user && !user.roles.includes('admin')) {
+    return null
+  }
+
   const data = {
     user: {
       name: user?.name || 'Loading...',
@@ -46,7 +51,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         title: t('sidebar.dashboard'),
         url: '/dashboard',
         icon: LayoutDashboard,
-        isActive: true,
+        isActive: pathname === '/dashboard' || pathname === '/',
       },
       {
         title: 'Ticket',
@@ -68,6 +73,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         title: t('sidebar.users'),
         url: '/user/',
         icon: Users,
+        isActive: pathname.includes('/user'),
       },
     ],
   }
