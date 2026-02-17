@@ -1,4 +1,4 @@
-import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import {
   Command,
   LayoutDashboard,
@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import type { User } from '@/services/auth.service'
 
 import { NavMain } from './nav-main'
 import { NavUser } from './nav-user'
@@ -22,13 +21,14 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 
-const adminRoute = getRouteApi('/_admin')
+import { useAuthStore } from '@/store/auth.store'
+
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
   const { pathname } = useLocation()
   const [mounted, setMounted] = React.useState(false)
-  const { user } = adminRoute.useRouteContext() as { user: User; isAdmin: boolean }
+  const user = useAuthStore((state) => state.user)
 
   React.useEffect(() => {
     setMounted(true)

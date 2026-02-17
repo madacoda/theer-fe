@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
 
 import { AdminSidebar } from '@/components/admin/layout/sidebar'
@@ -8,54 +9,16 @@ import {
 } from '@/components/ui/sidebar'
 import { authService } from '@/services/auth.service'
 import { isAuthenticated, removeToken } from '@/lib/auth'
+import { useAuthStore } from '@/store/auth.store'
 
 export const Route = createFileRoute('/_admin')({
   beforeLoad: async ({ location }: { location: any }) => {
-    // Only redirect on the client side for localStorage-based auth
-    if (typeof window !== 'undefined') {
-      if (!isAuthenticated()) {
-        throw redirect({
-          to: '/login',
-          search: {
-            redirect: location.href,
-          },
-        })
-      }
-
-      try {
-        const user = await authService.getProfile()
-        const isAdmin = user.roles?.includes('admin') || user.email.includes('admin')
-
-        // 1. Root redirect: If user hits /, send them to their respective home
-        if (location.pathname === '/' || location.pathname === '') {
-          throw redirect({
-            to: isAdmin ? '/dashboard' : '/ticket',
-          })
-        }
-
-        // 2. Simple RBAC: Protect admin-only routes
-        const adminOnlyPaths = ['/dashboard', '/user', '/course', '/blog']
-        const currentPath = location.pathname
-
-        if (!isAdmin && adminOnlyPaths.some((path) => currentPath.startsWith(path))) {
-          throw redirect({
-            to: '/ticket',
-          })
-        }
-
-        return { user, isAdmin }
-      } catch (error) {
-        // If it's already a redirect being thrown, re-throw it
-        if (error && typeof error === 'object' && 'to' in error) {
-          throw error
-        }
-
-        console.error('Auth verification failed:', error)
-        removeToken()
-        throw redirect({
-          to: '/login',
-        })
-      }
+    // Immediate client-side check for token
+    if (typeof window !== 'undefined' && !isAuthenticated()) {
+      throw redirect({
+        to: '/login',
+        search: { redirect: location.href },
+      })
     }
   },
   component: AdminLayout,
@@ -85,9 +48,53 @@ function AdminNotFound() {
 
 
 function AdminLayout() {
+  const setUser = useAuthStore((state) => state.setUser)
+  const isAdmin = useAuthStore((state) => state.isAdmin)
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+    
+    if (typeof window !== 'undefined' && isAuthenticated()) {
+      authService.getProfile()
+        .then((user) => {
+          setUser(user)
+          
+          // RBAC and Redirects after profile fetch
+          const isAdminRole = user.roles?.includes('admin')
+          const pathname = window.location.pathname
+          
+          // 1. Root redirect
+          if (pathname === '/' || pathname === '') {
+            window.location.href = isAdminRole ? '/dashboard' : '/ticket'
+            return
+          }
+
+          // 2. RBAC protection
+          const adminOnlyPaths = ['/dashboard', '/user', '/course', '/blog']
+          if (!isAdminRole && adminOnlyPaths.some(p => pathname.startsWith(p))) {
+            window.location.href = '/ticket'
+          }
+        })
+        .catch((error) => {
+          console.error('AdminLayout hydration auth failed:', error)
+          if (error?.response?.status === 401) {
+            removeToken()
+            window.location.href = '/login'
+          }
+        })
+    }
+  }, [setUser])
+
+  // Hydration safety: Don't render role-based content on the server
+  // This prevents the 'redirect to login on hard reload' bug
+  if (!mounted) {
+    return null
+  }
+
   return (
     <SidebarProvider className="admin-theme">
-      <AdminSidebar />
+      {isAdmin && <AdminSidebar />}
       <SidebarInset>
         <AdminHeader />
         <div className="flex flex-1 flex-col gap-6 p-6">

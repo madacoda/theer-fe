@@ -17,20 +17,17 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 
 // import { NotificationBell } from './notification-bell'
 
-import { authService, type User } from '@/services/auth.service'
+import { useAuthStore } from '@/store/auth.store'
 
 export function AdminHeader() {
   const location = useLocation()
   const pathnames = location.pathname.split('/').filter((x) => x)
   const [mounted, setMounted] = React.useState(false)
-  const [user, setUser] = React.useState<User | null>(null)
+  const isAdmin = useAuthStore((state) => state.isAdmin)
 
   React.useEffect(() => {
     setMounted(true)
-    authService.getProfile().then(setUser).catch(console.error)
   }, [])
-
-  const isAdmin = user?.roles.includes('admin')
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 shadow-sm bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">

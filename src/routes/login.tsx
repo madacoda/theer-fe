@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { isAuthenticated, setToken } from '@/lib/auth'
 import { authService } from '@/services/auth.service'
+import { useAuthStore } from '@/store/auth.store'
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -29,7 +30,8 @@ export const Route = createFileRoute('/login')({
     if (typeof window !== 'undefined' && isAuthenticated()) {
       try {
         const user = await authService.getProfile()
-        const isAdmin = user.roles?.includes('admin') || user.email.includes('admin')
+        const isAdmin = user.roles?.includes('admin') || false
+        useAuthStore.getState().setUser(user)
         throw redirect({
           to: isAdmin ? '/dashboard' : '/ticket',
         })
@@ -82,7 +84,9 @@ function LoginPage() {
         if (redirectUrl) {
           window.location.href = redirectUrl
         } else {
-          const isAdmin = response.data.user.roles?.includes('admin') || response.data.user.email.includes('admin')
+          const user = response.data.user
+          const isAdmin = user.roles?.includes('admin') || false
+          useAuthStore.getState().setUser(user)
           await navigate({ to: isAdmin ? '/dashboard' : '/ticket' })
         }
       } else {
