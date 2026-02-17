@@ -2,49 +2,88 @@
 
 This is the frontend application for the AI Support "Triage & Recovery" Hub.
 
-## Prerequisites
+## 🛠 Prerequisites
 
-- Docker and Docker Compose installed.
-- (Optional) Backend API running on `http://mctheer-api:3000` within the `mctheer-network`.
+- [Bun](https://bun.sh/) (Primary package manager)
+- [Docker](https://www.docker.com/) and Docker Compose
+- **Backend API**: Ensure the backend services are running before starting the frontend container.
 
-## Quick Start (Docker)
+---
 
-To run the application in a production-ready Docker container with no hassle:
+## 🚀 Quick Start (Local Development)
 
-### Windows (PowerShell)
+To run the application locally using Bun:
+
+1. **Clone the repository** (if you haven't already).
+2. **Setup Environment Variables**:
+   ```bash
+   cp .env.example .env
+   ```
+3. **Install Dependencies**:
+   ```bash
+   bun install
+   ```
+4. **Run Development Server**:
+   ```bash
+   bun run dev
+   ```
+   The app will be available at [http://localhost:3000](http://localhost:3000) (or the port specified in your console).
+
+---
+
+## 🐳 Running with Docker
+
+### 🚨 Important: Backend First
+
+Before starting the frontend Docker container, make sure the backend services are already up and running within the `mctheer-network`.
+
+### Automated Setup
+
+We provide setup scripts that handle network creation and container orchestration.
+
+#### Windows (PowerShell)
 
 ```powershell
 ./setup.ps1
 ```
 
-### Linux / Mac
+#### Linux / Mac
 
 ```bash
 chmod +x setup.sh
 ./setup.sh
 ```
 
-This will:
+### Manual Docker Setup
 
-1. Create the required Docker network (`mctheer-network`) if it doesn't exist.
-2. Build the Docker image.
-3. Start the container on port `1000`.
+If you prefer running Docker Compose directly:
 
-Access the application at [http://localhost:1000](http://localhost:1000).
+1. **Verify Network**: Ensure `mctheer-network` exists.
+2. **Build and Start**:
+   ```bash
+   docker compose up -d --build
+   ```
 
-## Environment Variables
+The application will be accessible at [http://localhost:1000](http://localhost:1000).
 
-Copy `.env.example` to `.env` to configure local development settings.
+---
 
-- `PORT`: Port to run the server on (default: 1000)
-- `VITE_API_URL`: Base URL for API requests (default: /)
-- `API_URL`: Backend API URL for server-side proxying (default: http://localhost:3000 locally, http://mctheer-api:3000 in Docker)
+## ⚙️ Environment Variables
 
-## Development
+Configure these in your `.env` file:
 
-To run locally without Docker:
+| Variable       | Description                        | Default                            |
+| :------------- | :--------------------------------- | :--------------------------------- |
+| `PORT`         | Local server port                  | `1000`                             |
+| `VITE_API_URL` | Client-side API base path          | `/`                                |
+| `API_URL`      | Backend API URL (for SSR proxying) | `http://mctheer-api:3000` (Docker) |
 
-```bash
-npm install
-npm run dev
-```
+---
+
+## 🧪 Other Commands
+
+- **Build**: `bun run build`
+- **Preview**: `bun run preview`
+- **Lint**: `bun run lint`
+- **Format**: `bun run check`
+- **Test**: `bun run test`
