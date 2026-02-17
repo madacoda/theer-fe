@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
 
 import { AdminSidebar } from '@/components/admin/layout/sidebar'
 import { AdminHeader } from '@/components/admin/layout/header'
@@ -48,6 +48,7 @@ function AdminNotFound() {
 
 
 function AdminLayout() {
+  const navigate = useNavigate()
   const setUser = useAuthStore((state) => state.setUser)
   const isAdmin = useAuthStore((state) => state.isAdmin)
   const [mounted, setMounted] = React.useState(false)
@@ -61,19 +62,15 @@ function AdminLayout() {
           setUser(user)
           
           // RBAC and Redirects after profile fetch
-          const isAdminRole = user.roles?.includes('admin')
+          const isAdminRole = user.roles?.some((role: any) => 
+            typeof role === 'string' && role.toLowerCase() === 'admin'
+          )
           const pathname = window.location.pathname
           
-          // 1. Root redirect
-          if (pathname === '/' || pathname === '') {
-            window.location.href = isAdminRole ? '/dashboard' : '/ticket'
-            return
-          }
-
-          // 2. RBAC protection
+          // RBAC protection (Previously handled root redirect here, now handled in index route)
           const adminOnlyPaths = ['/dashboard', '/user', '/course', '/blog']
           if (!isAdminRole && adminOnlyPaths.some(p => pathname.startsWith(p))) {
-            window.location.href = '/ticket'
+            navigate({ to: '/ticket' })
           }
         })
         .catch((error) => {
@@ -84,11 +81,11 @@ function AdminLayout() {
 
           if (isUnauthenticated) {
             removeToken()
-            window.location.href = '/login'
+            navigate({ to: '/login' })
           }
         })
     }
-  }, [setUser])
+  }, [setUser, navigate])
 
   // Hydration safety: Don't render role-based content on the server
   // This prevents the 'redirect to login on hard reload' bug
