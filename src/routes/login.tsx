@@ -24,12 +24,18 @@ const loginSearchSchema = z.object({
 
 export const Route = createFileRoute('/login')({
   validateSearch: (search) => loginSearchSchema.parse(search),
-  beforeLoad: () => {
+  beforeLoad: async () => {
     // Only redirect on client to avoid server-side localStorage issues
     if (typeof window !== 'undefined' && isAuthenticated()) {
-      throw redirect({
-        to: '/dashboard',
-      })
+      try {
+        const user = await authService.getProfile()
+        const isAdmin = user.roles?.includes('admin') || user.email.includes('admin')
+        throw redirect({
+          to: isAdmin ? '/dashboard' : '/ticket',
+        })
+      } catch (e) {
+        // If profile fetch fails, let them stay on login page (token might be invalid)
+      }
     }
   },
   component: LoginPage,
@@ -76,7 +82,8 @@ function LoginPage() {
         if (redirectUrl) {
           window.location.href = redirectUrl
         } else {
-          await navigate({ to: '/dashboard' })
+          const isAdmin = response.data.user.roles?.includes('admin') || response.data.user.email.includes('admin')
+          await navigate({ to: isAdmin ? '/dashboard' : '/ticket' })
         }
       } else {
         setError('No token received from server')

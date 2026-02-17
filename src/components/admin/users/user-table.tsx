@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { Edit, Trash2 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -95,24 +94,26 @@ export function UserTable({
                 </TableCell>
                 <TableCell>{formatDate(user.createdAt)}</TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => onEdit(user)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => onDelete(user)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {user.role.toLowerCase() !== 'user' && (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => onEdit(user)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => onDelete(user)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))

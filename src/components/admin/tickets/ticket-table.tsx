@@ -1,7 +1,6 @@
 import { format } from 'date-fns'
-import { MoreHorizontal, MessageSquare, Eye, CheckCircle2 } from 'lucide-react'
+import { MoreHorizontal, Eye, CheckCircle2 } from 'lucide-react'
 import * as React from 'react'
-import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -31,7 +30,6 @@ interface TicketTableProps {
 }
 
 export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTableProps) {
-  const { t } = useTranslation()
   const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
@@ -44,6 +42,8 @@ export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTable
         return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>
       case 'processing':
         return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 animate-pulse">Processing</Badge>
+      case 'processed':
+        return <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">Processed</Badge>
       case 'resolved':
         return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Resolved</Badge>
       case 'failed':
@@ -53,7 +53,7 @@ export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTable
     }
   }
 
-  const getUrgencyBadge = (urgency?: string) => {
+  const getUrgencyBadge = (urgency?: string | null) => {
     if (!urgency) return null
     switch (urgency) {
       case 'High':
@@ -81,7 +81,7 @@ export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTable
             {isAdmin && <TableHead>Urgency</TableHead>}
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="text-right w-[100px]">Actions</TableHead>
+            <TableHead className="text-center w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -103,43 +103,27 @@ export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTable
                 <TableCell>
                   {ticket.category ? (
                     <Badge variant="outline" className="font-medium">{ticket.category.title}</Badge>
-                  ) : ticket.triage?.category ? (
-                    <Badge variant="outline" className="font-medium">{ticket.triage.category}</Badge>
                   ) : (
                     <span className="text-muted-foreground italic text-xs">Uncategorized</span>
                   )}
                 </TableCell>
-                {isAdmin && <TableCell>{getUrgencyBadge(ticket.urgency || ticket.triage?.urgency)}</TableCell>}
+                {isAdmin && <TableCell>{getUrgencyBadge(ticket.urgency)}</TableCell>}
                 <TableCell>{getStatusBadge(ticket.status)}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {format(new Date(ticket.created_at), 'MMM dd, HH:mm')}
                 </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-primary/10 transition-colors">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[160px]">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => onView(ticket)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Detail
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      {isAdmin && ticket.status !== 'resolved' && (
-                        <DropdownMenuItem 
-                          onClick={() => onResolve?.(ticket)}
-                          className="text-green-600 focus:text-green-600 focus:bg-green-50"
-                        >
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Resolve
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <TableCell className="text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10"
+                      onClick={() => onView(ticket)}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      View
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))

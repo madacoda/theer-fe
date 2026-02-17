@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Filter, Plus, Search, X } from 'lucide-react'
 import * as React from 'react'
@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { TicketTable } from '@/components/admin/tickets/ticket-table'
 import { TicketForm } from '@/components/admin/tickets/ticket-form'
 import { TicketDetailModal } from '@/components/admin/tickets/ticket-detail-modal'
-import { Badge } from '@/components/ui/badge'
+
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -37,7 +37,7 @@ export const Route = createFileRoute('/_admin/ticket/')({
 
 function TicketsPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
+
   const [tickets, setTickets] = React.useState<Ticket[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [isAdmin, setIsAdmin] = React.useState(false)
@@ -80,7 +80,8 @@ function TicketsPage() {
     try {
       setIsLoading(true)
       await ticketService.createTicket({
-        ...values,
+        title: values.title,
+        content: values.content,
         category_id: parseInt(values.category_id)
       })
       toast.success('Ticket created successfully! Our AI is triaging it now.')
@@ -130,7 +131,7 @@ function TicketsPage() {
     fetchData(1, pagination.limit)
   }
 
-  const activeFiltersCount = 0 // Tickets currently only has search in the UI I see
+
 
   return (
     <div className="space-y-4">
@@ -162,10 +163,11 @@ function TicketsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && fetchData(1, pagination.limit)}
+            suppressHydrationWarning
           />
         </div>
         <div className="flex items-center gap-2">
-          <Button className="h-9 gap-2" variant="outline">
+          <Button className="h-9 gap-2" variant="outline" suppressHydrationWarning>
             <Filter className="h-4 w-4" />
             {t('common.filters')}
           </Button>
@@ -303,6 +305,7 @@ function TicketsPage() {
         ticket={selectedTicket}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
+        isAdmin={isAdmin}
       />
     </div>
   )

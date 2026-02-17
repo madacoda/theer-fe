@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
 
 import { AdminSidebar } from '@/components/admin/layout/sidebar'
 import { AdminHeader } from '@/components/admin/layout/header'
@@ -7,18 +6,56 @@ import {
   SidebarInset,
   SidebarProvider,
 } from '@/components/ui/sidebar'
-import { isAuthenticated } from '@/lib/auth'
+import { authService } from '@/services/auth.service'
+import { isAuthenticated, removeToken } from '@/lib/auth'
 
 export const Route = createFileRoute('/_admin')({
-  beforeLoad: ({ location }) => {
+  beforeLoad: async ({ location }: { location: any }) => {
     // Only redirect on the client side for localStorage-based auth
-    if (typeof window !== 'undefined' && !isAuthenticated()) {
-      throw redirect({
-        to: '/login',
-        search: {
-          redirect: location.href,
-        },
-      })
+    if (typeof window !== 'undefined') {
+      if (!isAuthenticated()) {
+        throw redirect({
+          to: '/login',
+          search: {
+            redirect: location.href,
+          },
+        })
+      }
+
+      try {
+        const user = await authService.getProfile()
+        const isAdmin = user.roles?.includes('admin') || user.email.includes('admin')
+
+        // 1. Root redirect: If user hits /, send them to their respective home
+        if (location.pathname === '/' || location.pathname === '') {
+          throw redirect({
+            to: isAdmin ? '/dashboard' : '/ticket',
+          })
+        }
+
+        // 2. Simple RBAC: Protect admin-only routes
+        const adminOnlyPaths = ['/dashboard', '/user', '/course', '/blog']
+        const currentPath = location.pathname
+
+        if (!isAdmin && adminOnlyPaths.some((path) => currentPath.startsWith(path))) {
+          throw redirect({
+            to: '/ticket',
+          })
+        }
+
+        return { user, isAdmin }
+      } catch (error) {
+        // If it's already a redirect being thrown, re-throw it
+        if (error && typeof error === 'object' && 'to' in error) {
+          throw error
+        }
+
+        console.error('Auth verification failed:', error)
+        removeToken()
+        throw redirect({
+          to: '/login',
+        })
+      }
     }
   },
   component: AdminLayout,
@@ -46,27 +83,8 @@ function AdminNotFound() {
   )
 }
 
+
 function AdminLayout() {
-  const navigate = useNavigate()
-  const [isReady, setIsReady] = useState(false)
-
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate({
-        to: '/login',
-        search: {
-          redirect: window.location.href,
-        },
-      })
-    } else {
-      setIsReady(true)
-    }
-  }, [navigate])
-
-  if (!isReady) {
-    return null
-  }
-
   return (
     <SidebarProvider className="admin-theme">
       <AdminSidebar />
@@ -79,3 +97,5 @@ function AdminLayout() {
     </SidebarProvider>
   )
 }
+
+export const adminRoute = Route

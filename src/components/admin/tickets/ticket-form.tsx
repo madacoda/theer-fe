@@ -29,7 +29,7 @@ import type { TicketCategoryOption } from '@/types/ticket'
 
 const ticketSchema = z.object({
   title: z.string().min(5, { message: 'Subject must be at least 5 characters' }),
-  description: z.string().min(20, { message: 'Description must be at least 20 characters' }),
+  content: z.string().min(20, { message: 'Content must be at least 20 characters' }),
   category_id: z.string().min(1, { message: 'Please select a category' }),
 })
 
@@ -53,7 +53,7 @@ export function TicketForm({ onSubmit, onCancel, isLoading }: TicketFormProps) {
     resolver: zodResolver(ticketSchema),
     defaultValues: {
       title: '',
-      description: '',
+      content: '',
       category_id: '',
     },
   })
@@ -105,7 +105,7 @@ export function TicketForm({ onSubmit, onCancel, isLoading }: TicketFormProps) {
 
         <FormField
           control={form.control}
-          name="description"
+          name="content"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Description</FormLabel>

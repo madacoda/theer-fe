@@ -1,4 +1,4 @@
-import { Link, useLocation } from '@tanstack/react-router'
+import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import {
   Command,
   LayoutDashboard,
@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { authService } from '@/services/auth.service'
 import type { User } from '@/services/auth.service'
 
 import { NavMain } from './nav-main'
@@ -23,22 +22,17 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 
+const adminRoute = getRouteApi('/_admin')
+
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
   const { pathname } = useLocation()
   const [mounted, setMounted] = React.useState(false)
-
-  const [user, setUser] = React.useState<User | null>(null)
+  const { user } = adminRoute.useRouteContext() as { user: User; isAdmin: boolean }
 
   React.useEffect(() => {
     setMounted(true)
-    authService.getProfile().then(setUser).catch(console.error)
   }, [])
-
-  // Show sidebar only for admin role
-  if (mounted && user && !user.roles.includes('admin')) {
-    return null
-  }
 
   const data = {
     user: {

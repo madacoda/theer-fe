@@ -66,20 +66,6 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [roles, setRoles] = useState<{ id: number; label: string }[]>([])
 
-  // Fetch roles
-  useEffect(() => {
-    adminUserService.getRoles().then((data) => {
-      setRoles(data)
-      if (!user) {
-        // Set default role to 'User' if creating new
-        const userRole = data.find((r: { label: string }) => r.label.toLowerCase() === 'user')
-        if (userRole) {
-          form.setValue('role', String(userRole.id))
-        }
-      }
-    }).catch(console.error)
-  })
-
   const form = useForm<UserFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: user
@@ -100,6 +86,21 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
           password_confirmation: '',
         },
   })
+
+  // Fetch roles and set default role for new users
+  useEffect(() => {
+    adminUserService.getRoles().then((data) => {
+      setRoles(data)
+      if (!user && data.length > 0) {
+        // Set default role to 'User' if creating new
+        const userRole = data.find((r: { label: string }) => r.label.toLowerCase() === 'user')
+        if (userRole) {
+          form.setValue('role', String(userRole.id))
+        }
+      }
+    }).catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only run once on mount
 
   const handleSubmit = async (values: UserFormValues) => {
     setIsSubmitting(true)

@@ -27,8 +27,8 @@ export const ticketService = {
   },
 
   async createTicket(data: {
-    subject: string
-    description: string
+    title: string
+    content: string
     category_id: number
   }): Promise<Ticket> {
     const response = await apiClient.post('/api/ticket', data)
@@ -61,7 +61,7 @@ export const ticketService = {
     }
   },
 
-  async getTicket(uuid: string, isAdmin: boolean = false): Promise<Ticket> {
+  async getTicket(uuid: string, isAdmin = false): Promise<Ticket> {
     const endpoint = isAdmin ? `/api/admin/ticket/${uuid}` : `/api/ticket/${uuid}`
     const response = await apiClient.get(endpoint)
     return response.data.data
@@ -80,7 +80,7 @@ export const ticketService = {
 
   async getCategories(): Promise<TicketCategoryOption[]> {
     const response = await apiClient.get('/api/ticket/category')
-    return response.data.data.map((category: any) => ({
+    return response.data.data.map((category: TicketCategoryOption) => ({
       id: category.id,
       title: category.title,
       description: category.description,
