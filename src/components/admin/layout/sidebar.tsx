@@ -83,8 +83,8 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="font-bold text-base tracking-tight text-primary">Theer</span>
-                  <span className="text-[10px] tracking-wider text-muted-foreground font-medium">Ticket Empowered Response</span>
+                  <span className="font-bold text-base tracking-tight text-primary uppercase">Theer</span>
+                  <span className="text-[10px] tracking-wider text-muted-foreground font-medium uppercase">AI-Assisted Ticket Triage</span>
                 </div>
               </Link>
             </SidebarMenuButton>

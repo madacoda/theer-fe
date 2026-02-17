@@ -29,6 +29,7 @@ export interface Ticket {
     name: string
   } | null
   resolved_at: string | null
+  is_ai_triage_failed: boolean | null
   created_at: string
   updated_at: string
 }

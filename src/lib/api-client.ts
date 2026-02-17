@@ -26,7 +26,11 @@ apiClient.interceptors.response.use(
     // Check if we're in a browser environment
     const isBrowser = typeof window !== 'undefined'
 
-    if (error.response?.status === 401) {
+    const isUnauthenticated = 
+      error.response?.status === 401 || 
+      (error.response?.status === 404 && error.response?.data?.message === 'User not found')
+
+    if (isUnauthenticated) {
       removeToken()
 
       // Only redirect if we're in the browser and NOT already on the login page

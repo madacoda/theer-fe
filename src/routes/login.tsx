@@ -107,11 +107,16 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm shadow-xl border-t-4 border-t-primary admin-theme animate-in fade-in zoom-in duration-300">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold tracking-tight text-center">
-            Welcome Back
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-2xl shadow-lg rotate-3 hover:rotate-0 transition-transform duration-300">
+              T
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-black tracking-tighter text-center uppercase">
+            Theer
           </CardTitle>
-          <CardDescription className="text-center">
-            Sign in to your account
+          <CardDescription className="text-center font-medium">
+            AI-Powered Ticket Triage & Recovery
           </CardDescription>
         </CardHeader>
         <CardContent>

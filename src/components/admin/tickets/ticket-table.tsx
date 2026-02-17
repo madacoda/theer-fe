@@ -79,6 +79,7 @@ export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTable
             {isAdmin && <TableHead>User</TableHead>}
             <TableHead>Category</TableHead>
             {isAdmin && <TableHead>Urgency</TableHead>}
+            {isAdmin && <TableHead className="text-center">AI Failed</TableHead>}
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-center w-[100px]">Actions</TableHead>
@@ -87,7 +88,7 @@ export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTable
         <TableBody>
           {tickets.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={isAdmin ? 8 : 7} className="h-24 text-center">
+              <TableCell colSpan={isAdmin ? 9 : 7} className="h-24 text-center">
                  No tickets found.
               </TableCell>
             </TableRow>
@@ -108,6 +109,17 @@ export function TicketTable({ tickets, onView, onResolve, isAdmin }: TicketTable
                   )}
                 </TableCell>
                 {isAdmin && <TableCell>{getUrgencyBadge(ticket.urgency)}</TableCell>}
+                {isAdmin && (
+                  <TableCell className="text-center">
+                    {ticket.is_ai_triage_failed ? (
+                      <Badge variant="destructive" className="font-black uppercase text-[9px] tracking-tighter">
+                        Failed
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground opacity-20">—</span>
+                    )}
+                  </TableCell>
+                )}
                 <TableCell>{getStatusBadge(ticket.status)}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {format(new Date(ticket.created_at), 'MMM dd, HH:mm')}

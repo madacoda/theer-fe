@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   Send,
   UserCheck,
+  AlertTriangle,
 } from 'lucide-react'
 import * as React from 'react'
 import { useState, useEffect } from 'react'
@@ -108,6 +109,24 @@ export function TicketDetailPage({ ticketId, isModal, onClose, isAdmin: propIsAd
     failed: 'bg-red-50 text-red-700 border-red-100',
   }
 
+  const getSentimentConfig = (score: number | null) => {
+    if (score === null) return { label: 'Not Analyzed', color: 'text-muted-foreground', icon: null }
+    if (score <= 3) return { label: 'Negative', color: 'text-rose-600', description: 'User seems frustrated or unhappy' }
+    if (score <= 6) return { label: 'Neutral', color: 'text-amber-600', description: 'User is providing neutral information' }
+    if (score <= 8) return { label: 'Positive', color: 'text-emerald-600', description: 'User is satisfied or polite' }
+    return { label: 'Very Positive', color: 'text-blue-600', description: 'User is very happy or appreciative' }
+  }
+
+  const getUrgencyConfig = (urgency: string | null) => {
+    const val = urgency?.toLowerCase() || 'low'
+    if (val === 'high') return { label: 'High Urgency', color: 'text-rose-600', description: 'Requires immediate attention' }
+    if (val === 'medium') return { label: 'Medium Urgency', color: 'text-amber-600', description: 'Address after high priority tasks' }
+    return { label: 'Low Urgency', color: 'text-emerald-600', description: 'Standard response time' }
+  }
+
+  const sentiment = getSentimentConfig(ticket.sentiment_score)
+  const urgency = getUrgencyConfig(ticket.urgency)
+
   return (
     <div className={`flex flex-col h-full bg-background ${isModal ? 'p-8' : 'container mx-auto py-10 max-w-4xl'}`}>
       {/* Header */}
@@ -147,6 +166,24 @@ export function TicketDetailPage({ ticketId, isModal, onClose, isAdmin: propIsAd
           </div>
         </div>
       </div>
+      
+      {ticket.is_ai_triage_failed && (
+        <div className="max-w-2xl mx-auto w-full mb-8">
+          <Card className="border-2 border-destructive bg-destructive/5 shadow-lg overflow-hidden">
+            <CardContent className="p-4 flex items-start gap-4">
+              <div className="h-10 w-10 rounded-full bg-destructive/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black uppercase tracking-tight text-destructive">AI Triage Failed</h3>
+                <p className="text-sm font-medium text-destructive/90 mt-1">
+                  The AI triage process failed for this ticket. Please handle this ticket more carefully as a human agent.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto w-full space-y-10">
         {/* Description Section */}
@@ -206,53 +243,72 @@ export function TicketDetailPage({ ticketId, isModal, onClose, isAdmin: propIsAd
 
         {/* Admin Actions Section */}
         {isAdmin && ticket.status !== 'resolved' && (
-          <section className="space-y-4">
+          <section className="space-y-6">
             <div className="flex items-center gap-2 px-1">
               <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Admin Workbench</h2>
             </div>
 
-            <Card className="border-2 border-primary/10 shadow-filament pt-6 pb-0">
+            {/* AI Insights Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3 transition-colors hover:bg-muted/40">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Urgency</p>
+                  <p className={`text-lg font-black tracking-tight ${urgency.color}`}>{urgency.label}</p>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed italic">
+                  "{urgency.description}"
+                </p>
+              </div>
+
+              <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3 transition-colors hover:bg-muted/40">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                    Sentiment <span className="opacity-40 text-[8px]">({ticket.sentiment_score ?? 0}/10)</span>
+                  </p>
+                  <p className={`text-lg font-black tracking-tight ${sentiment.color}`}>{sentiment.label}</p>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed italic">
+                  "{sentiment.description}"
+                </p>
+              </div>
+            </div>
+
+            <Card className="border-2 border-primary/10 shadow-filament pt-6 pb-0 overflow-hidden">
               <CardContent className="p-0">
                 <div className="flex flex-col">
                   <div className="p-6">
                     <Textarea 
                       value={editedDraft}
                       onChange={(e) => setEditedDraft(e.target.value)}
-                      className="min-h-[200px] shadow-inner font-sans leading-relaxed text-sm bg-background/50 border-none focus-visible:ring-0 p-0 resize-none placeholder:italic"
-                      placeholder="Prepare the final resolution..."
+                      className="min-h-[220px] shadow-inner font-sans text-base bg-background/50 border-none focus-visible:ring-0 p-0 resize-none placeholder:italic"
+                      placeholder="Type your resolution response here..."
                     />
                   </div>
                   
-                  <div className="bg-muted/30 border-t p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest space-y-1">
-                      <p className="flex justify-between w-40"><span>Urgency:</span> <span className="text-foreground">{ticket.urgency || 'Normal'}</span></p>
-                      <p className="flex justify-between w-40"><span>Sentiment:</span> <span className="text-foreground">{ticket.sentiment_score ?? 0}/10</span></p>
-                    </div>
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                      <Button 
-                        variant="outline"
-                        className="flex-1 sm:flex-none border-2 h-11 px-6 font-bold text-xs uppercase tracking-widest hover:bg-destructive/5 hover:text-destructive"
-                        onClick={() => {
-                          toast.info('Ticket closed.');
-                          if (isModal) onClose?.();
-                        }}
-                      >
-                        Close
-                      </Button>
-                      <Button 
-                        className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white font-bold h-11 px-8 text-xs uppercase tracking-widest shadow-lg"
-                        onClick={handleResolve}
-                        disabled={isResolving || !editedDraft}
-                      >
-                        {isResolving ? (
-                          <Clock className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="mr-2 h-4 w-4" />
-                        )}
-                        Resolve
-                      </Button>
-                    </div>
+                  <div className="bg-muted/40 border-t p-6 flex flex-col sm:flex-row items-center justify-end gap-3">
+                    <Button 
+                      variant="ghost"
+                      className="w-full sm:w-auto font-bold text-xs uppercase tracking-widest hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => {
+                        if (isModal) onClose?.();
+                        else navigate({ to: '/ticket' });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-black h-12 px-10 text-xs uppercase tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-50"
+                      onClick={handleResolve}
+                      disabled={isResolving || !editedDraft}
+                    >
+                      {isResolving ? (
+                        <Clock className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="mr-3 h-4 w-4" />
+                      )}
+                      Resolve Ticket
+                    </Button>
                   </div>
                 </div>
               </CardContent>

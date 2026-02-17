@@ -78,7 +78,11 @@ function AdminLayout() {
         })
         .catch((error) => {
           console.error('AdminLayout hydration auth failed:', error)
-          if (error?.response?.status === 401) {
+          const isUnauthenticated = 
+            error?.response?.status === 401 || 
+            (error?.response?.status === 404 && error?.response?.data?.message === 'User not found')
+
+          if (isUnauthenticated) {
             removeToken()
             window.location.href = '/login'
           }

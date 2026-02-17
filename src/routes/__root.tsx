@@ -22,13 +22,48 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Theer | AI-Powered Ticket Triage & Recovery Hub',
+      },
+      {
+        name: 'description',
+        content:
+          'Theer is an advanced AI-assisted ticket triage and recovery system. It intelligently ingests, categorizes, and prioritizes support complaints to streamline your resolution workflow.',
+      },
+      {
+        property: 'og:title',
+        content: 'Theer | AI-Powered Ticket Triage',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Empowering support teams with intelligent AI automation for seamless ticket management and faster resolutions.',
+      },
+      {
+        property: 'og:image',
+        content: '/logo.png',
+      },
+      {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image',
       },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'icon',
+        type: 'image/x-icon',
+        href: '/icon/favicon.ico',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/icon/apple-touch-icon.png',
       },
       {
         rel: 'preconnect',
